@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
+import os
+from gtts import gTTS
 import wikipediaapi
 import vosk
 import sounddevice as sd
@@ -33,6 +35,17 @@ def get_wiki_content(topic):
     page = wiki_wiki.page(topic)
     return page.text if page.exists() else "Page not found."
 
+def generate_speech(text, filename="output.mp3"):
+    """Generates speech using gTTS and saves as an audio file."""
+    try:
+        tts = gTTS(text=text, lang="en")
+        file_path = os.path.join("static", filename)
+        tts.save(file_path)
+        return file_path  # Return file path to send to frontend
+    except Exception as e:
+        print(f"❌ Error generating speech: {e}")
+        return None
+
 @app.route('/')
 def index():
     """Renders chat interface."""
@@ -63,7 +76,7 @@ def get_response():
             response_text = system_controller.control_spotify(command, song_name)
 
         # Handle macOS Reminder
-        if user_input.startswith("/remind "):
+        elif user_input.startswith("/remind "):
             parts = user_input.replace("/remind ", "").split(" at ")
             if len(parts) == 2:
                 response_text = task_manager.set_reminder(parts[0], parts[1])
@@ -83,11 +96,21 @@ def get_response():
         else:
             response_text = new_ai_agent.query(user_input)
 
+        # Generate speech for the response
+        speech_file = generate_speech(response_text)
+
+        return jsonify(message=response_text, audio_url=speech_file if speech_file else None)
+
     except Exception as e:
         print("Error processing request:", str(e))
-        return jsonify(message="An error occurred. Please try again.")
+        return jsonify(message="An error occurred. Please try again.", audio_url=None)
 
-    return jsonify(message=response_text)
+@app.route('/static/<filename>')
+def serve_audio(filename):
+    """Serves the generated audio file."""
+    return send_file(os.path.join("static", filename))
 
 if __name__ == "__main__":
+    if not os.path.exists("static"):
+        os.makedirs("static")  # Ensure 'static' folder exists for audio files
     app.run(debug=True)

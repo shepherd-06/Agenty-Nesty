@@ -24,20 +24,6 @@
             width: 100%;
             height: 50px;
         }
-
-        /* Microphone Button */
-        #micButton {
-            position: fixed;
-            bottom: 80px;
-            right: 20px;
-            background: red;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 1000;
-        }
     </style>
 </head>
 
@@ -63,10 +49,8 @@
             </div>
         </div>
     </div>
-    </div>
 
-    <!-- Microphone Button -->
-    <button id="micButton">🎤</button>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
@@ -89,49 +73,25 @@
                 var text = $('#text').val();
                 $('#sendButton').prop('disabled', true);
                 $('#spinner').show();
+
                 $.post('/get_response', { text: text }, function (data) {
                     $('#messages').show();
-                    $('#messages').append('<li><strong>You:</strong> ' + text + '<br><strong>AI:</strong> ' + data.message + '</li>');
+                    let messageHTML = '<li><strong>You:</strong> ' + text + '<br><strong>AI:</strong> ' + data.message + '</li>';
+
+                    // If there's an audio file, add the audio player
+                    if (data.audio_url) {
+                        messageHTML += `<br><audio id="ttsAudio" controls autoplay>
+                                          <source src="${data.audio_url}" type="audio/mpeg">
+                                          Your browser does not support the audio element.
+                                        </audio>`;
+                    }
+
+                    $('#messages').append(messageHTML);
                     $('#text').val('');
                     $('#sendButton').prop('disabled', false);
                     $('#spinner').hide();
                 });
             });
-
-            // Voice Recognition Toggle
-            var recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-            recognition.lang = 'en-US';
-
-            $('#micButton').on('click', function () {
-                if (!isRecording) {
-                    recognition.start();
-                    $('#micButton').css("background", "green"); // Indicate recording
-                    isRecording = true;
-                    console.log("🎙️ Recording Started...");
-                } else {
-                    recognition.stop();
-                    $('#micButton').css("background", "red"); // Reset button
-                    isRecording = false;
-                    console.log("🎙️ Recording Stopped...");
-                }
-            });
-
-            recognition.onresult = function (event) {
-                var voiceText = event.results[0][0].transcript;
-                console.log("🎙️ Voice recognized:", voiceText);
-                $('#text').val(voiceText);
-                $('#form').submit();
-            };
-
-            recognition.onerror = function (event) {
-                console.error("Speech recognition error:", event.error);
-            };
-
-            recognition.onend = function () {
-                isRecording = false; // Reset flag when recording ends
-                $('#micButton').css("background", "red");
-                console.log("🎙️ Speech Recognition Ended...");
-            };
         });
     </script>
 
