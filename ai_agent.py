@@ -31,7 +31,7 @@ class OpenAIAgent:
 
             **System Application Control**  
             - Command: `/open <app>`  
-            - You open macOS applications like **VS Code, Chrome, Terminal, etc.**  
+            - You open macOS applications like **VS Code, Safari, Spotify, etc.**  
             - Example: `/open vscode` will launch Visual Studio Code.
 
             **Spotify Control**  

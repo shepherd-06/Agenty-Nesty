@@ -10,14 +10,14 @@ class SystemController:
         Opens an application on the laptop based on the app name.
         """
         try:
-            if app_name.lower() == "chrome":
-                subprocess.run(["open", "-a", "Google Chrome"])  # macOS
+            if app_name.lower() == "safari":
+                subprocess.run(["open", "-a", "Safari"])  # macOS
             elif app_name.lower() == "spotify":
                 subprocess.run(["open", "-a", "Spotify"])  # macOS
             elif app_name.lower() == "vscode":
-                subprocess.run(["code"])  # VS Code (assumes it's in PATH)
+                subprocess.run(["open", "-a", "code"])  # VS Code (assumes it's in PATH)
             else:
-                return f"Unknown application '{app_name}'. Try 'chrome', 'spotify', or 'vscode'."
+                return f"Unknown application '{app_name}'. Try 'safari', 'spotify', or 'vscode'."
 
             return f"Opening {app_name}..."
         except Exception as e:
