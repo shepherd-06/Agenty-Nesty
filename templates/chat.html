@@ -1,143 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agent N3sty!</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
-<style>
-  #messages {
-    max-height: 400px; /* Fixed height for scroll effect */
-    overflow-y: auto;  /* Enables scrolling */
-    padding: 10px;
-    border: 1px solid #ddd;
-    background: #f9f9f9;
-  }
-  
-  #messages li {
-    margin-bottom: 20px; /* More space between threads */
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Nesty!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
+    <style>
+        #messages {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+        }
 
-  .btn-primary {
-    width: 100%; /* Wider button */
-    height: 50px; /* Increase height */
-  }
+        #messages li {
+            margin-bottom: 20px;
+        }
 
-  /* Floating scroll-to-bottom button */
-  #scrollButton {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: none; /* Hidden initially */
-    z-index: 1000;
-  }
+        .btn-primary {
+            width: 100%;
+            height: 50px;
+        }
 
-  /* Enhanced styling for autocomplete dropdown */
-  .ui-menu-item-wrapper {
-    font-size: 16px;
-    background: #FFF;
-    border-bottom: 1px solid #ddd;
-    padding: 10px 10px;
-    color: #333;
-    line-height: 24px;
-  }
-</style>
+        /* Microphone Button */
+        #micButton {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
-  <div class="row mt-5">
-    <div class="col-md-6 offset-md-3">
-        <h3 class="mb-4 text-center"><s>GPT-2 Pre-Trained</s></h3>
-        <h2 class="mb-4 text-center">Agent Nesty!</h2>
-        <ul id="messages" class="list-unstyled" style="display:none"></ul>
-        <form id="form" action="/get_response" method="post">
-          <div class="mb-3">
-            <input type="text" 
-            class="form-control" 
-            id="text" name="text" placeholder="Say something..." 
-            required>
-          </div>
-          <div id="spinner" style="display:none; padding: 10px">
-            <div class="spinner-border text-primary text-center" role="status">
-              <span class="visually-hidden">Loading...</span>
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-md-6 offset-md-3">
+                <h3 class="mb-4 text-center">Agent Nesty!</h3>
+                <ul id="messages" class="list-unstyled"></ul>
+                <form id="form" action="/get_response" method="post">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="text" name="text" placeholder="Say something..."
+                            required>
+                    </div>
+                    <div id="spinner" style="display:none; padding: 10px">
+                        <div class="spinner-border text-primary text-center" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="sendButton">Send</button>
+                </form>
             </div>
-          </div>
-          <button type="submit" class="btn btn-primary" id="sendButton">Send</button>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
-</div>
+    </div>
 
-<!-- Scroll to Bottom Button -->
-<button id="scrollButton">↓</button>
+    <!-- Microphone Button -->
+    <button id="micButton">🎤</button>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<script>
-$(document).ready(function() {
-    var commands = ["/wiki", "/open", "/info", "/help", "/spotify", "/play", "/play_song", "/pause"]; // Add more predefined commands
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var commands = ["/wiki", "/info", "/help"];
+            var isRecording = false; // Toggle flag for recording
 
-    // Autocomplete feature
-    $('#text').autocomplete({
-      source: commands,
-      minLength: 1,
-      select: function(event, ui) {
-        this.value = ui.item.value + " ";
-        return false;
-      }
-    });
+            $('#text').autocomplete({
+                source: commands,
+                minLength: 1,
+                select: function (event, ui) {
+                    this.value = ui.item.value + " ";
+                    return false;
+                }
+            });
 
-    // Handle form submission
-    $('#form').on('submit', function(e) {
-        e.preventDefault();
-        var text = $('#text').val();
-        $('#sendButton').prop('disabled', true); // Disable the button
-        $('#spinner').show(); // Show spinner
+            $('#form').on('submit', function (e) {
+                e.preventDefault();
+                var text = $('#text').val();
+                $('#sendButton').prop('disabled', true);
+                $('#spinner').show();
+                $.post('/get_response', { text: text }, function (data) {
+                    $('#messages').append('<li><strong>You:</strong> ' + text + '<br><strong>AI:</strong> ' + data.message + '</li>');
+                    $('#text').val('');
+                    $('#sendButton').prop('disabled', false);
+                    $('#spinner').hide();
+                });
+            });
 
-        $.post('/get_response', {text: text}, function(data) {
-            $('#messages').show();
-            $('#messages').append('<li><strong>You:</strong> ' + text + '<br><strong>AI:</strong> ' + data.message + '</li>');
-            $('#text').val('');
-            $('#sendButton').prop('disabled', false); // Enable the button
-            $('#spinner').hide(); // Hide spinner
+            // Voice Recognition Toggle
+            var recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+            recognition.lang = 'en-US';
 
-            scrollToBottom(); // Automatically scroll to the latest message
+            $('#micButton').on('click', function () {
+                if (!isRecording) {
+                    recognition.start();
+                    $('#micButton').css("background", "green"); // Indicate recording
+                    isRecording = true;
+                    console.log("🎙️ Recording Started...");
+                } else {
+                    recognition.stop();
+                    $('#micButton').css("background", "red"); // Reset button
+                    isRecording = false;
+                    console.log("🎙️ Recording Stopped...");
+                }
+            });
+
+            recognition.onresult = function (event) {
+                var voiceText = event.results[0][0].transcript;
+                console.log("🎙️ Voice recognized:", voiceText);
+                $('#text').val(voiceText);
+                $('#form').submit();
+            };
+
+            recognition.onerror = function (event) {
+                console.error("Speech recognition error:", event.error);
+            };
+
+            recognition.onend = function () {
+                isRecording = false; // Reset flag when recording ends
+                $('#micButton').css("background", "red");
+                console.log("🎙️ Speech Recognition Ended...");
+            };
         });
-    });
+    </script>
 
-    // Function to scroll to bottom
-    function scrollToBottom() {
-        var messagesDiv = $('#messages');
-        messagesDiv.scrollTop(messagesDiv.prop("scrollHeight"));
-    }
-
-    // Show/hide "Scroll to Bottom" button when scrolling
-    $('#messages').on('scroll', function() {
-        var scrollButton = $('#scrollButton');
-        if ($(this).scrollTop() + $(this).innerHeight() < this.scrollHeight) {
-            scrollButton.fadeIn();
-        } else {
-            scrollButton.fadeOut();
-        }
-    });
-
-    // Scroll to bottom when clicking the button
-    $('#scrollButton').on('click', function() {
-        scrollToBottom();
-    });
-
-    // Initially scroll to bottom in case there are preloaded messages
-    scrollToBottom();
-});
-</script>
 </body>
+
 </html>
