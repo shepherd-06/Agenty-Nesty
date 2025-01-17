@@ -1,25 +1,36 @@
 import subprocess
+import os
 
 class SystemController:
     """
     Handles system-level tasks such as opening applications and controlling Spotify playback.
     """
 
+    def find_application(self, app_name):
+        """
+        Searches for an installed application in the `/Applications` folder.
+        Returns the full path if found, otherwise returns None.
+        """
+        applications_folder = "/Applications"
+        possible_apps = [app for app in os.listdir(applications_folder) if app_name.lower() in app.lower()]
+
+        if possible_apps:
+            return os.path.join(applications_folder, possible_apps[0])  # Return the first match
+        return None
+
     def open_application(self, app_name):
         """
-        Opens an application on the laptop based on the app name.
+        Opens an application if it's found, otherwise suggests available options.
         """
         try:
-            if app_name.lower() == "safari":
-                subprocess.run(["open", "-a", "Safari"])  # macOS
-            elif app_name.lower() == "spotify":
-                subprocess.run(["open", "-a", "Spotify"])  # macOS
-            elif app_name.lower() == "vscode":
-                subprocess.run(["open", "-a", "code"])  # VS Code (assumes it's in PATH)
-            else:
-                return f"Unknown application '{app_name}'. Try 'safari', 'spotify', or 'vscode'."
+            found_app = self.find_application(app_name)
 
-            return f"Opening {app_name}..."
+            if found_app:
+                subprocess.run(["open", "-a", found_app])  # Open found application
+                return f"Opening {app_name}..."
+            else:
+                return f"Application '{app_name}' not found. Try specifying a correct app name."
+
         except Exception as e:
             return f"Failed to open {app_name}. Error: {str(e)}"
 
