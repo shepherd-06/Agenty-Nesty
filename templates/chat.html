@@ -9,7 +9,7 @@
     <link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet">
     <style>
         #messages {
-            max-height: 400px;
+            height: auto;
             overflow-y: auto;
             padding: 10px;
             border: 1px solid #ddd;
@@ -24,6 +24,29 @@
             width: 100%;
             height: 50px;
         }
+
+        #commandSuggestions {
+            display: none;
+            background: #f8f9fa;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+
+        .command-item {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .command-item:hover {
+            background: #ddd;
+        }
+
+        .command-hint {
+            font-size: 12px;
+            color: #555;
+        }
     </style>
 </head>
 
@@ -36,9 +59,33 @@
                 <ul id="messages" class="list-unstyled" style="display:none"></ul>
                 <form id="form" action="/get_response" method="post">
                     <div class="mb-3">
-                        <input type="text" class="form-control" id="text" name="text" placeholder="Say something..."
-                            required>
+                        <input type="text" class="form-control" id="text" name="text"
+                            placeholder="Type '/' for commands..." required autocomplete="off">
                     </div>
+
+                    <!-- Command Suggestions Box -->
+                    <div id="commandSuggestions">
+                        <div class="command-item" data-command="/wiki" title="Search Wikipedia and summarize">
+                            🔍 <strong>/wiki</strong> - Search Wikipedia (Example: /wiki Black Hole)
+                        </div>
+                        <div class="command-item" data-command="/open" title="Open a macOS application">
+                            🚀 <strong>/open</strong> - Open an app (Example: /open vscode)
+                        </div>
+                        <div class="command-item" data-command="/spotify" title="Control Spotify">
+                            🎵 <strong>/spotify</strong> - Control music (Example: /spotify play)
+                        </div>
+                        <div class="command-item" data-command="/email inbox"
+                            title="Read unread emails from macOS Mail">
+                            📧 <strong>/email inbox</strong> - Read new emails
+                        </div>
+                        <div class="command-item" data-command="/remind" title="Set a reminder in macOS Reminders">
+                            ⏰ <strong>/remind</strong> - Set a reminder (Example: /remind Buy milk at 18:00)
+                        </div>
+                        <div class="command-item" data-command="/search" title="Search for a file on your Mac">
+                            📂 <strong>/search</strong> - Search a file (Example: /search resume.pdf)
+                        </div>
+                    </div>
+
                     <div id="spinner" style="display:none; padding: 10px">
                         <div class="spinner-border text-primary text-center" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -50,22 +97,27 @@
         </div>
     </div>
 
-    </div>
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
     <script>
         $(document).ready(function () {
-            var commands = ["/wiki", "/info", "/help"];
-            var isRecording = false; // Toggle flag for recording
+            var commands = ["/wiki", "/open", "/spotify", "/email inbox", "/remind", "/search"];
 
-            $('#text').autocomplete({
-                source: commands,
-                minLength: 1,
-                select: function (event, ui) {
-                    this.value = ui.item.value + " ";
-                    return false;
+            // Autocomplete when typing "/"
+            $('#text').on('input', function () {
+                var inputValue = $(this).val();
+                if (inputValue.startsWith("/")) {
+                    $("#commandSuggestions").show();
+                } else {
+                    $("#commandSuggestions").hide();
                 }
+            });
+
+            // Insert command when clicked from suggestions
+            $(".command-item").on("click", function () {
+                var command = $(this).data("command") + " ";
+                $("#text").val(command);
+                $("#commandSuggestions").hide();
             });
 
             $('#form').on('submit', function (e) {
@@ -90,7 +142,15 @@
                     $('#text').val('');
                     $('#sendButton').prop('disabled', false);
                     $('#spinner').hide();
+                    $("#commandSuggestions").hide();
                 });
+            });
+
+            // Hide command suggestions when clicking outside
+            $(document).click(function (event) {
+                if (!$(event.target).closest("#text, #commandSuggestions").length) {
+                    $("#commandSuggestions").hide();
+                }
             });
         });
     </script>
