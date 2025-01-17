@@ -47,7 +47,7 @@
         <div class="row mt-5">
             <div class="col-md-6 offset-md-3">
                 <h3 class="mb-4 text-center">Agent Nesty!</h3>
-                <ul id="messages" class="list-unstyled"></ul>
+                <ul id="messages" class="list-unstyled" style="display:none"></ul>
                 <form id="form" action="/get_response" method="post">
                     <div class="mb-3">
                         <input type="text" class="form-control" id="text" name="text" placeholder="Say something..."
@@ -90,6 +90,7 @@
                 $('#sendButton').prop('disabled', true);
                 $('#spinner').show();
                 $.post('/get_response', { text: text }, function (data) {
+                    $('#messages').show();
                     $('#messages').append('<li><strong>You:</strong> ' + text + '<br><strong>AI:</strong> ' + data.message + '</li>');
                     $('#text').val('');
                     $('#sendButton').prop('disabled', false);
