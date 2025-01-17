@@ -14,9 +14,9 @@ class TaskManager:
             end tell
             '''
             subprocess.run(["osascript", "-e", script])
-            return f"✅ Reminder added: '{reminder_text}' at {time_str}"
+            return f"Reminder added: '{reminder_text}' at {time_str}"
         except Exception as e:
-            return f"❌ Failed to create reminder: {str(e)}"
+            return f"Failed to create reminder: {str(e)}"
         
     
     def read_macos_mail(self):
@@ -53,27 +53,27 @@ class TaskManager:
             output = result.stdout.strip().split("##")  # Split the returned values
 
             if len(output) < 3:
-                return "❌ Error processing emails."
+                return "Error processing emails."
 
             total_unread = output[0]
             today_count = output[1]
             today_emails = output[2].split(", ") if output[2] else []
 
             # Format the response
-            response = f"📧 You have {total_unread} unread emails."
-            response += f"\n📅 {today_count} new emails received today."
+            response = f"You have {total_unread} unread emails."
+            response += f"\n{today_count} new emails received today."
             if today_count != "0":
-                response += "\n📩 Today's emails:\n" + "\n".join(today_emails)
+                response += "\nToday's emails:\n" + "\n".join(today_emails)
 
             return response.strip()
 
         except Exception as e:
-            return f"❌ Error reading macOS Mail: {str(e)}"
+            return f"Error reading macOS Mail: {str(e)}"
         
     
     def search_files(self, filename):
         """Searches for a file by name."""
         for root, _, files in os.walk(os.path.expanduser("~")):
             if filename in files:
-                return f"📂 File found: {os.path.join(root, filename)}"
-        return f"❌ File '{filename}' not found."
+                return f"File found: {os.path.join(root, filename)}"
+        return f"File '{filename}' not found."
