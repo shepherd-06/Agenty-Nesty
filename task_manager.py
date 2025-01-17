@@ -20,7 +20,7 @@ class TaskManager:
         
     
     def read_macos_mail(self):
-        """Fetches unread emails from the macOS Mail app and summarizes them."""
+        """Fetches unread emails from the macOS Mail app and formats them for web display."""
         try:
             # AppleScript to get unread emails
             script = '''
@@ -40,7 +40,7 @@ class TaskManager:
 
                     if formattedDate is equal to currentDate then
                         set todayCount to todayCount + 1
-                        set end of todayList to (senderName & ": " & emailSubject)
+                        set end of todayList to (senderName & " - " & emailSubject)
                     end if
                 end repeat
                 
@@ -53,22 +53,28 @@ class TaskManager:
             output = result.stdout.strip().split("##")  # Split the returned values
 
             if len(output) < 3:
-                return "Error processing emails."
+                return "<p>Error processing emails.</p>"
 
             total_unread = output[0]
             today_count = output[1]
             today_emails = output[2].split(", ") if output[2] else []
 
-            # Format the response
-            response = f"You have {total_unread} unread emails."
-            response += f"\n{today_count} new emails received today."
+            # Format response as HTML
+            response = f"<p><strong>You have {total_unread} unread emails.</strong></p>"
+            response += f"<p><strong>{today_count} new emails received today.</strong></p>"
+
             if today_count != "0":
-                response += "\nToday's emails:\n" + "\n".join(today_emails)
+                response += "<p><strong>Today's Emails:</strong></p><ul>"
+                for email_entry in today_emails:
+                    sender, subject = email_entry.split(" - ", 1) if " - " in email_entry else (email_entry, "No Subject")
+                    response += f"<li><strong>{sender}</strong>: {subject}</li>"
+                response += "</ul>"
 
             return response.strip()
 
         except Exception as e:
-            return f"Error reading macOS Mail: {str(e)}"
+            return f"<p>Error reading macOS Mail: {str(e)}</p>"
+
         
     
     def search_files(self, filename):

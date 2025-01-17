@@ -9,6 +9,7 @@ import queue
 from ai_agent import OpenAIAgent
 from system_controller import SystemController
 from task_manager import TaskManager
+import re
 
 # Flask Initialization
 app = Flask(__name__)
@@ -35,10 +36,16 @@ def get_wiki_content(topic):
     page = wiki_wiki.page(topic)
     return page.text if page.exists() else "Page not found."
 
+def strip_html_tags(text):
+    """Removes HTML tags from the given text."""
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
+
 def generate_speech(text, filename="output.mp3"):
     """Generates speech using gTTS and saves as an audio file."""
     try:
-        tts = gTTS(text=text, lang="en")
+        clean_text = strip_html_tags(text)
+        tts = gTTS(text=clean_text, lang="en")
         file_path = os.path.join("static", filename)
         tts.save(file_path)
         return file_path  # Return file path to send to frontend
