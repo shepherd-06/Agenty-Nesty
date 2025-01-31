@@ -3,10 +3,17 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package-mac": "electron-packager . 'Agent Nesty' --platform=darwin --arch=x64 --icon=icon.icns --overwrite"
   },
   "dependencies": {
     "electron": "^27.0.0",
     "wait-on": "^8.0.2"
+  },
+  "build": {
+    "appId": "com.agentnesty.app",
+    "mac": {
+      "icon": "icon.icns"
+    }
   }
 }
