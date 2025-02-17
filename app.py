@@ -3,13 +3,13 @@ import os
 from gtts import gTTS
 import wikipediaapi
 import vosk
-import sounddevice as sd
-import json
+import sounddevice as sd # unused
+import json # unused
 import queue
-from ai_agent import OpenAIAgent
-from system_controller import SystemController
-from task_manager import TaskManager
-import system_monitor
+from service.ai_agent import OpenAIAgent
+from service.system_controller import SystemController
+from service.task_manager import TaskManager
+import service.system_monitor as system_monitor
 import re
 
 # Flask Initialization

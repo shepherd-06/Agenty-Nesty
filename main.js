@@ -11,6 +11,10 @@ let settingsWindow
 let tray
 let statsWindow
 
+const htmlBasePath = path.join(__dirname, 'electron_app', 'html');
+const jsBasePath = path.join(__dirname, 'electron_app', 'js');
+
+
 
 app.whenReady().then(async () => {
     // Main Chat Window
@@ -21,7 +25,7 @@ app.whenReady().then(async () => {
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js') // Secure communication
+            preload: path.join(jsBasePath, 'preload.js') // Secure communication
         }
     })
 
@@ -89,7 +93,7 @@ function openSettingsWindow() {
         }
     })
 
-    settingsWindow.loadFile('settings.html')
+    settingsWindow.loadFile(path.join(htmlBasePath, 'settings.html'))
     settingsWindow.once('ready-to-show', () => settingsWindow.show())
 
     settingsWindow.on('closed', () => {
@@ -115,7 +119,7 @@ function openStatsWindow() {
         }
     })
 
-    statsWindow.loadFile('stats.html')
+    statsWindow.loadFile(path.join(htmlBasePath, 'stats.html'))
     statsWindow.once('ready-to-show', () => statsWindow.show())
 
     statsWindow.on('closed', () => {

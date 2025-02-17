@@ -1,8 +1,8 @@
 import vosk
 import sounddevice as sd
 import json
-from ai_agent import OpenAIAssistant
-from system_controller import SystemController
+from service.ai_agent import OpenAIAssistant
+from service.system_controller import SystemController
 
 class VoiceAssistant:
     """
