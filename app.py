@@ -9,6 +9,7 @@ import queue
 from ai_agent import OpenAIAgent
 from system_controller import SystemController
 from task_manager import TaskManager
+import system_monitor
 import re
 
 # Flask Initialization
@@ -116,6 +117,13 @@ def get_response():
 def serve_audio(filename):
     """Serves the generated audio file."""
     return send_file(os.path.join("static", filename))
+
+@app.route('/get_system_stats', methods=['GET'])
+def get_system_stats():
+    """ Fetch system resource stats and return JSON response. """
+    stats = system_monitor.get_system_stats()
+    return jsonify(stats)
+
 
 if __name__ == "__main__":
     if not os.path.exists("static"):

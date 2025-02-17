@@ -9,6 +9,8 @@ app.commandLine.appendSwitch('disable-software-rasterizer')
 let mainWindow
 let settingsWindow
 let tray
+let statsWindow
+
 
 app.whenReady().then(async () => {
     // Main Chat Window
@@ -53,11 +55,15 @@ app.whenReady().then(async () => {
                 openSettingsWindow()
             }
         },
+        { label: 'System Stats', click: () => openStatsWindow() },
         { type: 'separator' },
         { role: 'quit' }
     ])
     tray.setToolTip('Agent Nesty')
     tray.setContextMenu(trayMenu)
+
+    // Check system stats every 10 seconds and update tray
+    setInterval(checkSystemStats, 10000)
 })
 
 // ✅ Function to Open Settings Window
@@ -89,4 +95,55 @@ function openSettingsWindow() {
     settingsWindow.on('closed', () => {
         settingsWindow = null
     })
+}
+
+function openStatsWindow() {
+    if (statsWindow) {
+        statsWindow.focus()
+        return
+    }
+
+    statsWindow = new BrowserWindow({
+        width: 400,
+        height: 300,
+        parent: mainWindow,
+        modal: true,
+        show: false,
+        resizable: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    })
+
+    statsWindow.loadFile('stats.html')
+    statsWindow.once('ready-to-show', () => statsWindow.show())
+
+    statsWindow.on('closed', () => {
+        statsWindow = null
+    })
+}
+
+// ✅ Fetch System Stats & Update Tray Tooltip
+async function checkSystemStats() {
+    try {
+        const response = await axios.get('http://127.0.0.1:5000/get_system_stats')
+        const stats = response.data
+
+        let tooltip = `⚙️ CPU: ${stats.cpu_usage}%  |  🖥 RAM: ${stats.ram_usage}%`
+        if (stats.cpu_temp !== "N/A") tooltip += `  |  🌡️ Temp: ${stats.cpu_temp}°C`
+        if (stats.fan_speed !== "N/A") tooltip += `  |  🔄 Fan: ${stats.fan_speed} RPM`
+
+        tray.setToolTip(`Agent Nesty - System Monitor\n${tooltip}`)
+
+        // ✅ Trigger alert if CPU usage or temp is high
+        if (stats.cpu_usage > 80 || stats.cpu_temp > 85) {
+            new Notification({
+                title: '⚠️ High System Usage!',
+                body: `CPU: ${stats.cpu_usage}%, Temp: ${stats.cpu_temp}°C`,
+                icon: path.join(__dirname, 'icon.png')
+            }).show()
+        }
+    } catch (error) {
+        console.error("Failed to fetch system stats:", error)
+    }
 }
