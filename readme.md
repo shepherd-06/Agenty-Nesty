@@ -67,3 +67,7 @@ npm start
 * 🔊 Text-to-Speech (gTTS Integration): AI responses are also spoken aloud using Google Text-to-Speech.
 
 🚀 Enjoy using Agent Nesty! Let us know if you have any feature suggestions! 😃
+
+## Credits
+
+Icon made by [Freepik](https://www.flaticon.com/free-icons/secret-agent "secret-agent icons") from [Flaticon](https://www.flaticon.com/).
